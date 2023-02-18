@@ -1,6 +1,7 @@
 import struct
 import zlib
-
+import requests
+import json
 
 class Proto:
     def __init__(self):
@@ -45,6 +46,21 @@ class Proto:
         if self.ver == 0:
             # 这里做回调
             print("====> callback:", self.body.decode('utf-8'))
+            try:
+                data = json.loads(self.body.decode('utf-8'))
+            except Exception as e:
+                print(e)
+                print("ingnore") 
+                return   
+            if data.get("data") is not None:
+                url = "http://127.0.0.1:5000/select"
+                headers = {'Content-Type': 'application/json; charset=utf-8'}
+                data = {
+                    "user_name":data.get("data").get("uname"),
+                    "message": data.get("data").get("msg")
+                }
+                response = requests.post(url, headers=headers, json=data)
+                # print(response.text)
         elif self.ver == 2:
             # 解压
             self.body = zlib.decompress(self.body)
